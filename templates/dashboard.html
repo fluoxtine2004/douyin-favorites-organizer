@@ -38,6 +38,17 @@
   .stat b{font-size:20px;color:var(--primary);display:block;}
   .stat span{font-size:12px;color:var(--muted);}
   .summary-card{background:linear-gradient(135deg,#eef2ff,#fdf4ff);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;white-space:pre-wrap;line-height:1.85;font-size:14px;}
+  /* 周报正文按 Markdown 渲染（标题/列表/引用/加粗），比纯文本可读得多 */
+  .summary-card.md{white-space:normal;line-height:1.8;}
+  .summary-card.md h4{font-size:14px;font-weight:700;margin:15px 0 6px;color:var(--text);}
+  .summary-card.md h4:first-child{margin-top:0;}
+  .summary-card.md ul{margin:6px 0 6px 20px;}
+  .summary-card.md li{margin:4px 0;}
+  .summary-card.md strong{color:var(--primary);font-weight:650;}
+  .summary-card.md blockquote{border-left:3px solid var(--primary-line);padding:3px 0 3px 12px;margin:9px 0;color:var(--text-2);}
+  .summary-card.md hr{border:none;border-top:1px solid var(--border);margin:15px 0;}
+  .summary-card.md p{margin:6px 0;}
+  .summary-card.md code{background:#eef0f4;border-radius:5px;padding:1px 5px;font-size:12.5px;}
   details.wk{margin-bottom:14px;}
   details.wk>summary{cursor:pointer;font-size:13px;color:var(--text-2);user-select:none;border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 13px;display:inline-block;font-weight:600;}
   details.wk>summary:hover{border-color:var(--primary);color:var(--primary);}
@@ -220,6 +231,26 @@ function load(k){try{return JSON.parse(localStorage.getItem(k)||"{}");}catch(e){
 function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
 function fmt(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+/* 极简 Markdown 渲染（只支持周报用到的语法），先转义再拼标签，避免 XSS */
+function mdLite(s){
+  const lines=String(s==null?"":s).split(/\r?\n/);
+  const inline=t=>esc(t)
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/`([^`]+)`/g,"<code>$1</code>");
+  const out=[];let inUl=false;
+  const closeUl=()=>{if(inUl){out.push("</ul>");inUl=false;}};
+  for(const raw of lines){
+    const t=raw.trim();let m;
+    if(!t){closeUl();continue;}
+    if(/^-{3,}$/.test(t)){closeUl();out.push("<hr>");continue;}
+    if((m=t.match(/^#{1,6}\s+(.*)$/))){closeUl();out.push("<h4>"+inline(m[1])+"</h4>");continue;}
+    if((m=t.match(/^>\s?(.*)$/))){closeUl();out.push("<blockquote>"+inline(m[1])+"</blockquote>");continue;}
+    if((m=t.match(/^[-*]\s+(.*)$/))){if(!inUl){out.push("<ul>");inUl=true;}out.push("<li>"+inline(m[1])+"</li>");continue;}
+    closeUl();out.push("<p>"+inline(t)+"</p>");
+  }
+  closeUl();
+  return out.join("");
+}
 function mmss(t){const m=Math.floor(t/60),s=t%60;return m+":"+String(s).padStart(2,"0");}
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1600);}
 function isStar(id){return !!(marks[id]&&marks[id].important);}
@@ -566,7 +597,7 @@ function render(){
            +'<button onclick="exportOverrides()" title="导出手工分类与标签，覆盖到 data/ 后重建即生效">🏷 导出分类修改</button>'
            +'<button onclick="exportMarks()" title="导出 ⭐重要 / 🔔回顾 标记">⭐ 导出标记</button>')
    +'</div>'
-   +(WEEKLY.text?'<details class="wk"><summary>📋 本期整理小结（点击展开）</summary><div class="summary-card">'+esc(WEEKLY.text)+'</div></details>':'')
+   +(WEEKLY.text?'<details class="wk"><summary>📋 本期整理小结（点击展开）</summary><div class="summary-card md">'+mdLite(WEEKLY.text)+'</div></details>':'')
    +'<div id="imp2"></div>'
    +(list.length?list.map(row).join(""):'<div class="empty">没有匹配的内容</div>');
   sideRender();

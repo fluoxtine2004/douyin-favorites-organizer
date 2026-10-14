@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="470" viewBox="0 0 1280 470" role="img" aria-label="处理管线：抓取 → 转写 → 提炼 → 生成">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbfbff"/>
+      <stop offset="100%" stop-color="#f6f5ff"/>
+    </linearGradient>
+    <linearGradient id="n1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#818cf8"/></linearGradient>
+    <linearGradient id="n2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+    <linearGradient id="n3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+    <linearGradient id="n4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#312e81" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      .t   { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
+      .stg { font-size:16px; font-weight:700; fill:#111827; }
+      .num { font-size:12px; font-weight:700; fill:#ffffff; }
+      .li  { font-size:12.5px; fill:#4b5563; }
+      .cap { font-size:13px; font-weight:700; fill:#374151; letter-spacing:.5px; }
+      .chip{ font-size:12.5px; font-weight:600; fill:#4f46e5; }
+      .note{ font-size:12px; fill:#8b93a1; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="470" rx="20" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1278" height="468" rx="19" fill="none" stroke="#e8eaee"/>
+
+  <!-- ============ 四个阶段 ============ -->
+  <g transform="translate(40,34)">
+    <!-- 阶段 1 -->
+    <g>
+      <g filter="url(#sh)"><rect width="270" height="176" rx="16" fill="#fff" stroke="#e8eaee"/></g>
+      <circle cx="26" cy="26" r="12" fill="url(#n1)"/>
+      <text class="t num" x="26" y="30.5" text-anchor="middle">1</text>
+      <text class="t stg" x="48" y="31">抓取收藏</text>
+      <path d="M22 52h226" stroke="#f0f1f5" stroke-width="1.5"/>
+      <g class="t li">
+        <text x="22" y="78">· 驱动真实浏览器，复用本人登录态</text>
+        <text x="22" y="102">· 保留你原有的收藏夹结构</text>
+        <text x="22" y="126">· 与已入库清单比对，缺口自动补抓</text>
+      </g>
+      <rect x="22" y="142" width="150" height="22" rx="11" fill="#eef2ff"/>
+      <text class="t chip" x="34" y="157">fetch_gap.py</text>
+    </g>
+
+    <!-- 箭头 -->
+    <g transform="translate(276,104)">
+      <path d="M0 6h22" stroke="#c7d2fe" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M19 0l7 6-7 6z" fill="#a5b4fc"/>
+    </g>
+
+    <!-- 阶段 2 -->
+    <g transform="translate(310,0)">
+      <g filter="url(#sh)"><rect width="270" height="176" rx="16" fill="#fff" stroke="#e8eaee"/></g>
+      <circle cx="26" cy="26" r="12" fill="url(#n2)"/>
+      <text class="t num" x="26" y="30.5" text-anchor="middle">2</text>
+      <text class="t stg" x="48" y="31">转写 + 截图</text>
+      <path d="M22 52h226" stroke="#f0f1f5" stroke-width="1.5"/>
+      <g class="t li">
+        <text x="22" y="78">· faster-whisper 本地转写，不上云</text>
+        <text x="22" y="102">· 场景切换检测 + 智能选帧</text>
+        <text x="22" y="126">· 只截有信息量的画面（图表/结论）</text>
+      </g>
+      <rect x="22" y="142" width="176" height="22" rx="11" fill="#f5f3ff"/>
+      <text class="t chip" x="34" y="157" fill="#7c3aed">process_batch.py</text>
+    </g>
+
+    <!-- 箭头 -->
+    <g transform="translate(586,104)">
+      <path d="M0 6h22" stroke="#c7d2fe" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M19 0l7 6-7 6z" fill="#a5b4fc"/>
+    </g>
+
+    <!-- 阶段 3 -->
+    <g transform="translate(620,0)">
+      <g filter="url(#sh)"><rect width="270" height="176" rx="16" fill="#fff" stroke="#e8eaee"/></g>
+      <circle cx="26" cy="26" r="12" fill="url(#n3)"/>
+      <text class="t num" x="26" y="30.5" text-anchor="middle">3</text>
+      <text class="t stg" x="48" y="31">清洗 + 提炼</text>
+      <path d="M22 52h226" stroke="#f0f1f5" stroke-width="1.5"/>
+      <g class="t li">
+        <text x="22" y="78">· 要点闸门：≤90 字、最多 3 条</text>
+        <text x="22" y="102">· 两级分类（收藏夹 → 大类，可改）</text>
+        <text x="22" y="126">· 用出现次序推算收藏时间并全局排序</text>
+      </g>
+      <rect x="22" y="142" width="112" height="22" rx="11" fill="#e0f2fe"/>
+      <text class="t chip" x="34" y="157" fill="#0369a1">enrich.py</text>
+    </g>
+
+    <!-- 箭头 -->
+    <g transform="translate(896,104)">
+      <path d="M0 6h22" stroke="#c7d2fe" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M19 0l7 6-7 6z" fill="#a5b4fc"/>
+    </g>
+
+    <!-- 阶段 4 -->
+    <g transform="translate(930,0)">
+      <g filter="url(#sh)"><rect width="270" height="176" rx="16" fill="#fff" stroke="#e8eaee"/></g>
+      <circle cx="26" cy="26" r="12" fill="url(#n4)"/>
+      <text class="t num" x="26" y="30.5" text-anchor="middle">4</text>
+      <text class="t stg" x="48" y="31">生成产物</text>
+      <path d="M22 52h226" stroke="#f0f1f5" stroke-width="1.5"/>
+      <g class="t li">
+        <text x="22" y="78">· 可批注网页 + Obsidian 笔记</text>
+        <text x="22" y="102">· 周 / 季 / 年三级总结</text>
+        <text x="22" y="126">· 打包离线站点 dist/</text>
+      </g>
+      <rect x="22" y="142" width="192" height="22" rx="11" fill="#ecfdf5"/>
+      <text class="t chip" x="34" y="157" fill="#047857">build_dashboard.py</text>
+    </g>
+  </g>
+
+  <!-- ============ 产物带 ============ -->
+  <text class="t cap" x="40" y="266">产物</text>
+
+  <g transform="translate(96,238)">
+    <rect width="270" height="60" rx="14" fill="#fff" stroke="#e8eaee" filter="url(#sh)"/>
+    <circle cx="34" cy="30" r="13" fill="#eef2ff"/>
+    <path d="M30 24h8m-8 6h8m-8 6h5" stroke="#4f46e5" stroke-width="1.8" stroke-linecap="round"/>
+    <text class="t" x="58" y="26" font-size="13.5" font-weight="700" fill="#111827">可批注网页</text>
+    <text class="t note" x="58" y="44">⭐重要 / 🔔回顾 / ✅待办 / 🏷改分类</text>
+  </g>
+  <g transform="translate(386,238)">
+    <rect width="270" height="60" rx="14" fill="#fff" stroke="#e8eaee" filter="url(#sh)"/>
+    <circle cx="34" cy="30" r="13" fill="#f5f3ff"/>
+    <path d="M29 24h10v12H29z M32 28h4 M32 32h4" stroke="#7c3aed" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <text class="t" x="58" y="26" font-size="13.5" font-weight="700" fill="#111827">Obsidian 笔记</text>
+    <text class="t note" x="58" y="44">一条视频一篇 + 专题聚合</text>
+  </g>
+  <g transform="translate(676,238)">
+    <rect width="270" height="60" rx="14" fill="#fff" stroke="#e8eaee" filter="url(#sh)"/>
+    <circle cx="34" cy="30" r="13" fill="#fffbeb"/>
+    <path d="M34 22v16 M26 30h16" stroke="#b45309" stroke-width="1.8" stroke-linecap="round"/>
+    <text class="t" x="58" y="26" font-size="13.5" font-weight="700" fill="#111827">周 / 季 / 年总结</text>
+    <text class="t note" x="58" y="44">本期新增 · 主题流向 · 可执行案例</text>
+  </g>
+  <g transform="translate(966,238)">
+    <rect width="270" height="60" rx="14" fill="#fff" stroke="#e8eaee" filter="url(#sh)"/>
+    <circle cx="34" cy="30" r="13" fill="#e0f2fe"/>
+    <path d="M29 25l5-3 5 3v10l-5-3-5 3z" stroke="#0369a1" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+    <text class="t" x="58" y="26" font-size="13.5" font-weight="700" fill="#111827">离线站点 dist/</text>
+    <text class="t note" x="58" y="44">纯静态，任意托管可发布</text>
+  </g>
+
+  <!-- ============ 底部说明 ============ -->
+  <line x1="40" y1="330" x2="1240" y2="330" stroke="#e8eaee"/>
+  <g class="t note">
+    <text x="40" y="358">· 全流程本地运行：视频、音频、截图、逐字稿都留在你自己的机器上，不上传云端。</text>
+    <text x="40" y="384">· 增量整理：再次运行只处理新收藏，不重复下载与转写；随时中断，续跑接着来。</text>
+    <text x="40" y="410">· 点赞 ≠ 收藏：入库以 collect_stat == 1 为硬护栏，绝不把点赞列表混进知识库。</text>
+    <text x="40" y="436">· 关键约束：抖音接口不返回收藏时间戳，排序键由「出现次序 + 夹内名次 + 首次入库日期」合成。</text>
+  </g>
+</svg>
