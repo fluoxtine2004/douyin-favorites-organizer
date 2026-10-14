@@ -1,0 +1,6 @@
+# 运行时依赖（Python 3.10+）
+playwright>=1.44
+faster-whisper>=1.0.3
+imageio-ffmpeg>=0.5.1
+Pillow>=10.0
+opencc-python-reimplemented>=0.1.7

@@ -1,0 +1,52 @@
+# ===== 个人数据（绝对不进仓库）=====
+# 全部用 / 锚定到仓库根，避免误伤 demo/media 这类示例资源
+/data/
+/media/
+/vault/
+/dist/
+/browser_profile/
+/models/
+/产出/
+/logs/
+/_stale_notes/
+*.genie
+
+# 凭据与状态（哪怕在 data/ 之外也拦一道）
+/cookies.txt
+*.cookies
+.gh_token
+*.token
+/.env
+.env.local
+/seen_ids.json
+/new_ids.json
+/favorites*.json
+/enriched.json
+/excluded.json
+/collect_index.json
+/collect_order.json
+/overrides.json
+/llm_notes.json
+/config/overrides.json
+
+# 临时与调试产物
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+*.log
+
+# 大体积媒体
+*.mp4
+*.wav
+*.mp3
+*.m4a
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

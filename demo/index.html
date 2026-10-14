@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抖音收藏知识库</title>
+<style>
+  :root{
+  --bg:#f6f7f9;--card:#fff;--border:#e8eaee;--border-strong:#dcdfe6;--text:#111827;--text-2:#4b5563;--muted:#8b93a1;
+  --primary:#4f46e5;--primary-light:#eef2ff;--primary-line:#c7d2fe;--chip:#f3f4f6;--star:#f59e0b;--star-soft:#fffbeb;
+  --review:#0284c7;--review-soft:#eff6ff;--ok:#059669;--ok-soft:#ecfdf5;--danger:#dc2626;--danger-soft:#fef2f2;
+  --sh1:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);--sh2:0 4px 16px rgba(16,24,40,.09);
+}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+  a{color:var(--primary);text-decoration:none;}
+  header{background:rgba(255,255,255,.86);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border);padding:12px 24px 0;position:sticky;top:0;z-index:20;}
+  .h-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .h-top h1{font-size:17px;margin-right:auto;font-weight:650;}
+  .badge{font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 10px;border-radius:999px;font-weight:600;}
+  .search{display:flex;min-width:200px;max-width:300px;flex:1;}
+  .search input{flex:1;border:1px solid var(--border);border-radius:8px 0 0 8px;padding:7px 11px;font-size:14px;outline:none;}
+  .search input:focus{border-color:var(--primary);}
+  .btn{border:none;background:var(--primary);color:#fff;padding:7px 13px;font-size:13.5px;cursor:pointer;border-radius:0 8px 8px 0;}
+  nav{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+  nav button{border:none;background:transparent;padding:6px 11px;font-size:13px;border-radius:999px;cursor:pointer;color:var(--text-2);font-family:inherit;transition:.15s;}
+  nav button.active{background:var(--primary);color:#fff;font-weight:600;box-shadow:0 1px 3px rgba(79,70,229,.35);}
+  nav .cnt{font-size:11px;margin-left:4px;color:var(--muted);}
+  nav .sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
+  nav .toggle{font-size:13px;color:var(--muted);cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:5px 10px;background:#fff;}
+  nav .toggle.on{border-color:var(--star);color:var(--star);background:#fffbeb;font-weight:600;}
+  nav select.lv2sel{border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:13px;background:#fff;color:var(--text);outline:none;max-width:240px;cursor:pointer;font-family:inherit;}
+  nav select.lv2sel:focus{border-color:var(--primary);}
+  nav select.lv2sel.on{border-color:var(--primary);color:var(--primary);font-weight:600;background:var(--primary-light);}
+  main{max-width:1180px;margin:20px auto 60px;padding:0 24px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1;min-width:110px;box-shadow:var(--sh1);}
+  .stat b{font-size:20px;color:var(--primary);display:block;}
+  .stat span{font-size:12px;color:var(--muted);}
+  .summary-card{background:linear-gradient(135deg,#eef2ff,#fdf4ff);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;white-space:pre-wrap;line-height:1.85;font-size:14px;}
+  details.wk{margin-bottom:14px;}
+  details.wk>summary{cursor:pointer;font-size:13px;color:var(--text-2);user-select:none;border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 13px;display:inline-block;font-weight:600;}
+  details.wk>summary:hover{border-color:var(--primary);color:var(--primary);}
+  details.wk[open]>summary{margin-bottom:10px;}
+  details.wk .summary-card{margin-bottom:0;}
+  .toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .toolbar button{border:1px solid var(--border-strong);background:#fff;border-radius:999px;padding:6px 13px;font-size:12.5px;cursor:pointer;color:var(--text-2);font-family:inherit;transition:.15s;}
+  .toolbar button:hover{border-color:var(--primary);color:var(--primary);}
+  .toolbar select.sortsel{border:1px solid var(--border-strong);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--text-2);font-family:inherit;cursor:pointer;outline:none;transition:.15s;}
+  .toolbar select.sortsel:hover{border-color:var(--primary);color:var(--primary);}
+  /* ---- 列表：简洁 ---- */
+  .row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:9px;display:flex;gap:14px;align-items:flex-start;cursor:pointer;transition:.16s;box-shadow:var(--sh1);}
+  .row:hover{border-color:var(--primary-line);box-shadow:var(--sh2);transform:translateY(-1px);}
+  .thumb{width:86px;height:54px;border-radius:7px;flex-shrink:0;object-fit:cover;background:linear-gradient(135deg,#6366f1,#8b5cf6);}
+  .row-main{flex:1;min-width:0;}
+  .row-title{font-size:14.5px;font-weight:600;line-height:1.45;display:flex;gap:6px;align-items:flex-start;}
+  .row-title .mk{font-size:13px;flex-shrink:0;}
+  .row-sum{margin-top:3px;font-size:13px;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .chip{font-size:11.5px;background:var(--chip);padding:2px 8px;border-radius:999px;color:var(--muted);}
+  .chip.major{background:var(--primary-light);color:var(--primary);font-weight:600;}
+  .chip.folder{background:#ecfdf5;color:#059669;}
+  .chip.new{background:#fef2f2;color:#dc2626;font-weight:600;}
+  .chip.wait{background:#f9fafb;color:#9ca3af;}
+  /* ---- 详情：详细 ---- */
+  .detail{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 28px;box-shadow:var(--sh1);}
+  .back{border:none;background:transparent;color:var(--primary);font-size:13.5px;cursor:pointer;padding:4px 0;margin-bottom:8px;}
+  .d-title{font-size:21px;font-weight:700;line-height:1.4;}
+  .d-full{font-size:12.5px;color:var(--muted);margin-top:6px;white-space:pre-wrap;}
+  .d-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+  .d-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 6px;}
+  .d-actions button{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;}
+  .d-actions button.on{background:#fffbeb;border-color:var(--star);color:#b45309;font-weight:600;}
+  .d-actions button.rev.on{background:#eff6ff;border-color:var(--review);color:#0369a1;font-weight:600;}
+  .sec{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+  .sec h3{font-size:15px;margin-bottom:10px;font-weight:650;}
+  .sum-box{background:#f8fafc;border-left:3px solid var(--primary);border-radius:8px;padding:12px 14px;font-size:14px;}
+  .points{margin:0 0 0 18px;line-height:1.9;font-size:13.5px;}
+  /* 时间轴 */
+  .tl{position:relative;margin-top:6px;}
+  .tl-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--border);}
+  .tl-item:last-child{border-bottom:none;}
+  .tl-time{flex-shrink:0;width:58px;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--primary);font-weight:650;padding-top:2px;}
+  .tl-body{flex:1;min-width:0;}
+  .tl-body img{width:100%;max-width:300px;border-radius:8px;display:block;cursor:zoom-in;border:1px solid var(--border);transition:.16s;box-shadow:var(--sh1);}
+  .tl-quote{margin-top:6px;font-size:13px;color:#374151;line-height:1.8;}
+  .tl-quote span{display:block;}
+  .tl-quote span::before{content:"「";color:var(--muted);}
+  .tl-quote span::after{content:"」";color:var(--muted);}
+  .tl-links{margin-top:6px;display:flex;gap:8px;font-size:12px;}
+  .tl-links button{border:none;background:var(--chip);border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--muted);font-size:12px;}
+  details{margin-top:6px;}
+  summary{cursor:pointer;font-size:13px;color:var(--muted);user-select:none;}
+  summary:hover{color:var(--primary);}
+  .trans{margin-top:10px;font-size:13.5px;line-height:1.95;color:#374151;max-height:520px;overflow:auto;}
+  .trans div{padding:2px 0;border-bottom:1px dotted #f1f2f4;cursor:pointer;}
+  .trans div:hover{background:#f8fafc;}
+  .trans b{color:var(--primary);font-weight:650;font-variant-numeric:tabular-nums;margin-right:8px;}
+  .chip.lv2{background:#eef2ff;color:#4338ca;}
+.chip.lv3{background:#f5f3ff;color:#7c3aed;}
+.chip.tag{background:#ecfdf5;color:#047857;cursor:pointer;}
+.del-btn{margin-left:8px;flex-shrink:0;border:1px solid var(--border);background:#fff;color:#9ca3af;border-radius:8px;width:26px;height:26px;cursor:pointer;font-size:13px;line-height:1;}
+.del-btn:hover{border-color:#dc2626;color:#dc2626;background:#fef2f2;}
+.tag-edit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;}
+.tag-edit select,.tag-edit input{border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:13.5px;font-family:inherit;}
+.tag-edit button{border:none;background:var(--primary);color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;}
+.tag-edit button.ghost{background:#fff;color:var(--muted);border:1px solid var(--border);}
+.tag-hint{margin-top:8px;font-size:12px;color:var(--muted);}
+.anno-area{margin-top:12px;background:#fffbeb;border:1px solid var(--star);border-radius:10px;padding:12px;}
+  .anno-area textarea{width:100%;min-height:64px;border:1px solid #fde68a;border-radius:8px;padding:8px;font-size:13.5px;font-family:inherit;resize:vertical;outline:none;}
+  .save-row{display:flex;gap:8px;margin-top:8px;}
+  .save-row button{border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;background:var(--star);color:#fff;}
+  .anno-item{background:#fff;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:13.5px;position:relative;}
+  .anno-item .del{position:absolute;top:6px;right:8px;border:none;background:none;color:#dc2626;cursor:pointer;font-size:12px;}
+  .anno-item .t{font-size:11px;color:var(--muted);display:block;margin-top:4px;}
+  .empty{text-align:center;color:var(--muted);padding:40px 0;}
+  /* ---- 布局：右侧栏（每日推荐 / 待办速览） ---- */
+  .layout{display:flex;gap:22px;max-width:1540px;margin:20px auto 60px;padding:0 24px;align-items:flex-start;}
+  .layout main{flex:1;min-width:0;max-width:1180px;margin:0;padding:0;}
+  .side{width:308px;flex-shrink:0;position:sticky;top:78px;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 96px);overflow:auto;padding-bottom:4px;}
+  .side-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 15px;box-shadow:var(--sh1);}
+  .side-card h4{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .side-card h4 .mini{margin-left:auto;font-size:11px;color:var(--muted);font-weight:500;cursor:pointer;border:1px solid var(--border);border-radius:999px;padding:1px 8px;background:#fff;}
+  .side-card h4 .mini:hover{border-color:var(--primary);color:var(--primary);}
+  .side-v{display:block;cursor:pointer;}
+  .side-v .sv-t{font-size:13.5px;font-weight:600;line-height:1.5;}
+  .side-v .sv-s{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:5px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+  .side-v .sv-d{font-size:11.5px;color:var(--primary);margin-top:6px;}
+  .side-case .sc-title{font-size:13.5px;font-weight:700;color:var(--text);}
+  .side-case .sc-act{font-size:12.5px;color:var(--text-2);line-height:1.8;margin-top:6px;}
+  .side-case .sc-why{font-size:12px;color:var(--muted);line-height:1.7;margin-top:7px;padding-left:8px;border-left:2px solid var(--primary-line);}
+  .side-case .sc-src{font-size:11.5px;color:var(--muted);margin-top:7px;}
+  .todo-add{display:flex;gap:6px;margin-bottom:8px;}
+  .todo-add input{flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-size:13px;font-family:inherit;outline:none;}
+  .todo-add input:focus{border-color:var(--primary);}
+  .todo-add button{border:none;background:var(--primary);color:#fff;border-radius:8px;padding:6px 11px;font-size:13px;cursor:pointer;}
+  .todo-item{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--border);font-size:13px;}
+  .todo-item:last-child{border-bottom:none;}
+  .todo-item input[type=checkbox]{margin-top:3px;flex-shrink:0;cursor:pointer;width:15px;height:15px;accent-color:var(--primary);}
+  .todo-item .tx{flex:1;min-width:0;line-height:1.6;word-break:break-word;}
+  .todo-item.done .tx{text-decoration:line-through;color:var(--muted);}
+  .todo-item .tm{display:block;font-size:11px;color:var(--muted);margin-top:2px;}
+  .todo-item .x{border:none;background:none;color:#9ca3af;cursor:pointer;font-size:13px;flex-shrink:0;}
+  .todo-item .x:hover{color:var(--danger);}
+  .todo-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--sh1);margin-bottom:12px;}
+  .todo-box .hint{font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .todo-tabs{display:flex;gap:6px;margin:10px 0 12px;}
+  .todo-tabs button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer;color:var(--text-2);font-family:inherit;}
+  .todo-tabs button.on{background:var(--primary-light);border-color:var(--primary-line);color:var(--primary);font-weight:600;}
+  .chip.date{background:#f5f3ff;color:#7c3aed;}
+  .toolbar button.on{background:var(--primary-light);border-color:var(--primary-line);color:var(--primary);font-weight:600;}
+  @media(max-width:1320px){.side{display:none;}.layout{max-width:1180px;}}
+  .lightbox{position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out;}
+  .lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.25s;z-index:60;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-top">
+    <h1>📚 抖音收藏知识库</h1>
+    <span class="badge" id="badge"></span>
+    <div class="search"><input id="q" placeholder="搜索标题 / 摘要 / 收藏夹 / 作者…" oninput="render()"><button class="btn" onclick="render()">搜索</button></div>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+<div class="layout">
+<main id="main"></main>
+<aside class="side" id="side"></aside>
+</div>
+<div class="lightbox" id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
+<div class="toast" id="toast"></div>
+<script>
+const MAJORS = ["学习", "生活", "成长", "旅游", "美食", "待归类"];
+const DATA = [{"id": "9000000000000000001", "title": "用 MCP 让本地文件夹变成 AI 的长期记忆", "full_title": "用 MCP 让本地文件夹变成 AI 的长期记忆 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000001", "cover": "media/9000000000000000001/cover.jpg", "author": "示例作者A", "duration": "11:20", "ts": 1760000000, "date": "2026-09-20", "cb": 9, "ci": 0, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹1", "major": "学习", "auto_major": "学习", "lv2": "AI工具", "lv3": "MCP与Skills", "tags": ["AI工具", "MCP与Skills"], "summary": "（示例）这条视频讲了「用 MCP 让本地文件夹变成 AI 的长期记忆」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 12, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 24, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 36, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 48, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 60, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}], "frames": [{"url": "media/9000000000000000001/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000001/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000001/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000002", "title": "三个月从零跑通一个副业小项目", "full_title": "三个月从零跑通一个副业小项目 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000002", "cover": "media/9000000000000000002/cover.jpg", "author": "示例作者B", "duration": "6:45", "ts": 1760086400, "date": "2026-09-20", "cb": 9, "ci": 1, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹2", "major": "成长", "auto_major": "成长", "lv2": "理财投资", "lv3": "副业搞钱", "tags": ["理财投资", "副业搞钱"], "summary": "（示例）这条视频讲了「三个月从零跑通一个副业小项目」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 12, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 24, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 36, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 48, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 60, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}], "frames": [{"url": "media/9000000000000000002/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000002/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000002/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000003", "title": "考研复试：联系导师邮件的写法拆解", "full_title": "考研复试：联系导师邮件的写法拆解 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000003", "cover": "media/9000000000000000003/cover.jpg", "author": "示例作者C", "duration": "4:12", "ts": 1760172800, "date": "2026-09-20", "cb": 9, "ci": 2, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹3", "major": "学习", "auto_major": "学习", "lv2": "科研", "lv3": "论文写作", "tags": ["科研", "论文写作"], "summary": "（示例）这条视频讲了「考研复试：联系导师邮件的写法拆解」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 12, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 24, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 36, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 48, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 60, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}], "frames": [{"url": "media/9000000000000000003/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000003/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000003/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000004", "title": "海边小城三天两晚的省钱路线", "full_title": "海边小城三天两晚的省钱路线 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000004", "cover": "media/9000000000000000004/cover.jpg", "author": "示例作者D", "duration": "8:03", "ts": 1760259200, "date": "2026-09-20", "cb": 9, "ci": 3, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹1", "major": "旅游", "auto_major": "旅游", "lv2": "国内游", "lv3": "海岛", "tags": ["国内游", "海岛"], "summary": "（示例）这条视频讲了「海边小城三天两晚的省钱路线」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 12, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 24, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 36, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 48, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 60, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}], "frames": [{"url": "media/9000000000000000004/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000004/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000004/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000005", "title": "十分钟搞定的高蛋白早餐", "full_title": "十分钟搞定的高蛋白早餐 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000005", "cover": "media/9000000000000000005/cover.jpg", "author": "示例作者E", "duration": "3:30", "ts": 1760345600, "date": "2026-09-20", "cb": 8, "ci": 4, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹2", "major": "美食", "auto_major": "美食", "lv2": "早餐", "lv3": "快手菜", "tags": ["早餐", "快手菜"], "summary": "（示例）这条视频讲了「十分钟搞定的高蛋白早餐」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 12, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 24, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 36, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 48, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 60, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}], "frames": [{"url": "media/9000000000000000005/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000005/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000005/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000006", "title": "为什么你总是坚持不下去：把目标切成 5 分钟", "full_title": "为什么你总是坚持不下去：把目标切成 5 分钟 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000006", "cover": "media/9000000000000000006/cover.jpg", "author": "示例作者F", "duration": "7:18", "ts": 1760432000, "date": "2026-09-20", "cb": 8, "ci": 5, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹3", "major": "成长", "auto_major": "成长", "lv2": "认知成长", "lv3": "心态建设", "tags": ["认知成长", "心态建设"], "summary": "（示例）这条视频讲了「为什么你总是坚持不下去：把目标切成 5 分钟」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 12, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 24, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 36, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 48, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 60, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}], "frames": [{"url": "media/9000000000000000006/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000006/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000006/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000007", "title": "Obsidian 双链笔记的三种用法", "full_title": "Obsidian 双链笔记的三种用法 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000007", "cover": "media/9000000000000000007/cover.jpg", "author": "示例作者G", "duration": "9:47", "ts": 1760518400, "date": "2026-09-20", "cb": 8, "ci": 6, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹1", "major": "学习", "auto_major": "学习", "lv2": "AI工具", "lv3": "知识库工具", "tags": ["AI工具", "知识库工具"], "summary": "（示例）这条视频讲了「Obsidian 双链笔记的三种用法」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 12, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 24, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 36, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 48, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 60, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}], "frames": [{"url": "media/9000000000000000007/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000007/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000007/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000008", "title": "出租屋改造：500 元预算的桌面升级", "full_title": "出租屋改造：500 元预算的桌面升级 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000008", "cover": "media/9000000000000000008/cover.jpg", "author": "示例作者H", "duration": "5:26", "ts": 1760604800, "date": "2026-09-20", "cb": 8, "ci": 7, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹2", "major": "生活", "auto_major": "生活", "lv2": "居家", "lv3": "改造", "tags": ["居家", "改造"], "summary": "（示例）这条视频讲了「出租屋改造：500 元预算的桌面升级」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 12, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 24, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 36, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 48, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 60, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}], "frames": [{"url": "media/9000000000000000008/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000008/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000008/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000009", "title": "一个人旅行的安全问题清单", "full_title": "一个人旅行的安全问题清单 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000009", "cover": "media/9000000000000000009/cover.jpg", "author": "示例作者I", "duration": "6:02", "ts": 1760691200, "date": "2026-09-20", "cb": 7, "ci": 8, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹3", "major": "旅游", "auto_major": "旅游", "lv2": "出行准备", "lv3": "安全", "tags": ["出行准备", "安全"], "summary": "（示例）这条视频讲了「一个人旅行的安全问题清单」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 12, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 24, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 36, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 48, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 60, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}], "frames": [{"url": "media/9000000000000000009/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000009/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000009/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000010", "title": "基金定投的常见误区和正确姿势", "full_title": "基金定投的常见误区和正确姿势 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000010", "cover": "media/9000000000000000010/cover.jpg", "author": "示例作者J", "duration": "12:35", "ts": 1760777600, "date": "2026-09-20", "cb": 7, "ci": 9, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹1", "major": "成长", "auto_major": "成长", "lv2": "理财投资", "lv3": "资产配置", "tags": ["理财投资", "资产配置"], "summary": "（示例）这条视频讲了「基金定投的常见误区和正确姿势」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 12, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 24, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 36, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 48, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 60, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}], "frames": [{"url": "media/9000000000000000010/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000010/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000010/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000011", "title": "肩颈放松的五个动作（久坐人群）", "full_title": "肩颈放松的五个动作（久坐人群） #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000011", "cover": "media/9000000000000000011/cover.jpg", "author": "示例作者K", "duration": "4:48", "ts": 1760864000, "date": "2026-09-20", "cb": 7, "ci": 10, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹2", "major": "生活", "auto_major": "生活", "lv2": "运动健身", "lv3": "拉伸", "tags": ["运动健身", "拉伸"], "summary": "（示例）这条视频讲了「肩颈放松的五个动作（久坐人群）」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}, {"t": 12, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 24, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 36, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 48, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 60, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}], "frames": [{"url": "media/9000000000000000011/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000011/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000011/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}, {"id": "9000000000000000012", "title": "一周备菜：周日两小时解决五天晚饭", "full_title": "一周备菜：周日两小时解决五天晚饭 #示例标签 #demo", "url": "https://www.douyin.com/video/9000000000000000012", "cover": "media/9000000000000000012/cover.jpg", "author": "示例作者L", "duration": "10:09", "ts": 1760950400, "date": "2026-09-20", "cb": 7, "ci": 11, "cdate": "2026-10-12", "cbefore": "", "captured": "2026-10-12 12:00:00", "folder": "示例收藏夹3", "major": "美食", "auto_major": "美食", "lv2": "备餐", "lv3": "meal prep", "tags": ["备餐", "meal prep"], "summary": "（示例）这条视频讲了「一周备菜：周日两小时解决五天晚饭」，演示用的一句话总结会出现在列表卡片上。", "points": ["把要解决的问题写清楚，写不清楚的地方往往就是卡点。", "找一个今天就能做完的最小可验证动作，先跑起来再优化。", "记录结果，否则三天后你就忘了当时的细节和判断。"], "segments": [{"t": 0, "text": "最后总结一下，核心就一句话——把大目标切成今天能完成的小动作。"}, {"t": 12, "text": "先说明一个前提：这套方法我自己用了大概三个月，确实有效。"}, {"t": 24, "text": "第一步是把要解决的问题写清楚，写不清楚的地方往往就是卡点。"}, {"t": 36, "text": "第二步是找一个最小的可验证动作，今天就能做完的那种。"}, {"t": 48, "text": "第三步是记录结果，不记录就等于没做过，三天后你会忘记细节。"}, {"t": 60, "text": "这里要提醒一个常见的坑：一开始就想做完整方案，结果三天就放弃。"}], "frames": [{"url": "media/9000000000000000012/kf_00020.jpg", "t": 20, "cap": "0:20"}, {"url": "media/9000000000000000012/kf_00065.jpg", "t": 65, "cap": "1:05"}, {"url": "media/9000000000000000012/kf_00110.jpg", "t": 110, "cap": "1:50"}], "has_transcript": true, "no_transcript": false}];
+const WEEKLY = {"text": "本次为 **演示周报**（示例数据，非真实收藏）。\n\n> demo 数据由 `demo/make_demo.py` 生成，用于展示 UI。真机上这里是每周自动生成的整理小结。\n\n## 本期结构与用法\n\n- **列表页**：按收藏时间 / 发布时间排序，卡片只给「改写后的标题 + 一句话总结」；\n- **详情页**：要点、**重要节点时间轴（时间点 ↔ 截图 ↔ 当时原话）**、完整逐字稿、批注区；\n- **待办**：任意视频可「加入待办」，独立页管理；\n- **周报**：每周自动汇总本期新增与主题流向，季度/年度再往上聚合。\n", "label": "3 个收藏夹"};
+const NEW_IDS = new Set(["9000000000000000010", "9000000000000000011", "9000000000000000012"]);
+const OVERRIDES = {};
+const DAILY_CASES = {"cases": [{"title": "给收藏夹做一次「最小整理」", "major": "学习", "action": "打开自己的收藏夹，只挑最近 10 条，给每条写一句话：这条视频解决什么问题。", "why": "演示页的「每日推荐」会从这里取；写一句话是把收藏变成知识的最小动作。"}, {"title": "把一条长视频变成可检索的笔记", "major": "成长", "action": "找一条 30 分钟以上的视频，只记 3 个要点和对应的时间点。", "why": "时间点是回看视频的唯一索引，没有时间点的笔记等于没记。"}]};
+const FOLDERS = ["示例收藏夹1", "示例收藏夹2", "示例收藏夹3"];
+const LS_OVR = "dy_overrides_v1";
+const LS_DEL = "dy_deleted_v1";
+let dels = [];
+try { dels = JSON.parse(localStorage.getItem(LS_DEL) || "[]"); } catch (e) { dels = []; }
+function isDel(id){return dels.indexOf(id) >= 0;}
+function delVideo(ev, id){ if(ev) ev.stopPropagation(); if(!isDel(id)) dels.push(id);
+  localStorage.setItem(LS_DEL, JSON.stringify(dels)); apiSave("excluded", dels); view="list"; curId=null; render();
+  toast("已删除（可到「🗑 已删除」恢复，或导出 excluded.json 永久排除）"); }
+function restoreVideo(id){ dels = dels.filter(x => x !== id); localStorage.setItem(LS_DEL, JSON.stringify(dels)); apiSave("excluded", dels); render(); toast("已恢复"); }
+function exportDeleted(){ const b=new Blob([JSON.stringify({ids: dels}, null, 2)], {type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="excluded.json"; a.click();
+  toast("已导出 excluded.json，放进 data/ 后重新抓取也不会再出现"); }
+let ovr = load(LS_OVR);
+function eff(v){const a=OVERRIDES[v.id]||{},b=ovr[v.id]||{};return {major:b.major||a.major||v.major, folder:b.folder||a.folder||v.folder};}
+function effView(v){const e=eff(v);const a=OVERRIDES[v.id]||{},b=ovr[v.id]||{};const o=Object.assign({},v);o.major=e.major;o.folder=e.folder;o.lv2=b.lv2||a.lv2||v.lv2||"";o.lv3=b.lv3||a.lv3||v.lv3||"";o.tags=(b.tags&&b.tags.length?b.tags:(a.tags&&a.tags.length?a.tags:(v.tags||[])));return o;}
+const LS_ANNO = "dy_anno_v1";
+const LS_MARK = "dy_marks_v1";
+let anno = load(LS_ANNO), marks = load(LS_MARK);
+let curTab = "all", curId = null, onlyStar = false, onlyNew = false, onlyTrans = false, view = "list";
+// ---- 排序 ----
+const LS_SORT = "dy_sort_v1";
+const LS_SORTKEY = "dy_sortkey_v1";
+let sortAsc = (localStorage.getItem(LS_SORT) === "asc");   // false=新→旧（默认）
+// "collect"=按我收藏这条的时间；"publish"=按视频发布时间
+let sortKey = localStorage.getItem(LS_SORTKEY) || "collect";
+// ---- 待办 ----
+const LS_TODO = "dy_todos_v1";
+let todos = [];
+try { todos = JSON.parse(localStorage.getItem(LS_TODO) || "[]"); } catch (e) { todos = []; }
+if (!Array.isArray(todos)) todos = [];
+let todoShowDone = false;
+// ---- 每日推荐（同一自然日内固定，可手动换） ----
+let dayOffset = 0;
+const LS_DAY = "dy_day_v1";
+try { const _d = JSON.parse(localStorage.getItem(LS_DAY) || "{}"); if (_d.date === todayStr()) dayOffset = _d.off || 0; } catch (e) {}
+function todayStr(){ const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function daySeed(){ const d = new Date(); return d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate(); }
+function load(k){try{return JSON.parse(localStorage.getItem(k)||"{}");}catch(e){return {};}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function fmt(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function mmss(t){const m=Math.floor(t/60),s=t%60;return m+":"+String(s).padStart(2,"0");}
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1600);}
+function isStar(id){return !!(marks[id]&&marks[id].important);}
+function isReview(id){return !!(marks[id]&&marks[id].review);}
+function toggleStar(id,ev){if(ev)ev.stopPropagation();marks[id]=marks[id]||{};marks[id].important=!marks[id].important;if(!marks[id].important&&!marks[id].review)delete marks[id];save(LS_MARK,marks);apiSave("marks",marks);render();}
+function toggleReview(id,ev){if(ev)ev.stopPropagation();marks[id]=marks[id]||{};marks[id].review=!marks[id].review;if(!marks[id].important&&!marks[id].review)delete marks[id];save(LS_MARK,marks);apiSave("marks",marks);render();}
+
+const TAXO = {"学习": {"AI工具": ["MCP与Skills", "Vibe Coding", "知识库工具"], "科研": ["论文写作", "文献阅读"]}, "成长": {"理财投资": ["资产配置", "副业搞钱"], "认知成长": ["心态建设", "复盘方法"]}, "生活": {"运动健身": ["拉伸"], "居家": ["改造"]}, "旅游": {"国内游": ["海岛"], "出行准备": ["安全"]}, "美食": {"早餐": ["快手菜"], "备餐": ["meal prep"]}, "待归类": {}};
+let curLv2 = "";
+function lv2List(major){ return Object.keys((TAXO||{})[major] || {}); }
+function lv3List(major, lv2){ const m=(TAXO||{})[major]||{}; return m[lv2] || []; }
+function allLv3(major){ const m=(TAXO||{})[major]||{}; let r=[]; for(const k in m) r=r.concat(m[k]||[]); return r; }
+function setLv2(x){ curLv2 = x||""; render(); }
+function tagHtml(v){ return (v.tags||[]).map(t=>'<span class="chip tag" onclick="delTag(\''+v.id+'\',\''+esc(t)+'\')" title="点击删除">'+esc(t)+' ✕</span>').join(""); }
+function baseTags(id){
+  if(ovr[id] && ovr[id].tags) return ovr[id].tags.slice();
+  return (((OVERRIDES[id]||{}).tags)||[]).slice();
+}
+function addTag(id){
+  const el=document.getElementById("inp-tag"); const t=(el.value||"").trim(); if(!t) return;
+  ovr[id]=ovr[id]||{}; const cur=baseTags(id); if(cur.indexOf(t)<0) cur.push(t); ovr[id].tags=cur;
+  save(LS_OVR,ovr); apiSave("overrides", ovr); render(); toast("已添加标签："+t);
+}
+function delTag(id,t){ ovr[id]=ovr[id]||{}; ovr[id].tags=baseTags(id).filter(x=>x!==t); save(LS_OVR,ovr); apiSave("overrides",ovr); render(); toast("已移除标签"); }
+let ONLINE = false;
+function apiSave(kind, data){
+  if(!ONLINE) return;
+  fetch("/api/save", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({kind: kind, data: data})})
+   .then(r=>r.json()).then(j=>{ if(!j.ok) toast("保存失败："+(j.err||"")); })
+   .catch(()=>{});
+}
+function apiRebuild(){
+  toast("正在同步到 Obsidian / 周报…");
+  fetch("/api/rebuild", {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"})
+   .then(r=>r.json()).then(j=>toast(j.ok ? "已同步（Obsidian 与周报已更新）" : "同步失败"));
+}
+function boot(){
+  // 仅本地服务模式才探测 /api/load；线上（静态站）走云端 SDK，避免无谓 404
+  const H = location.hostname;
+  if(H !== "127.0.0.1" && H !== "localhost") return;
+  fetch("/api/load").then(r=>r.json()).then(d=>{
+    ONLINE = true;
+    if(d.overrides) ovr = Object.assign({}, d.overrides, ovr);
+    if(d.excluded && d.excluded.ids) dels = Array.from(new Set(dels.concat(d.excluded.ids)));
+    if(d.marks) marks = Object.assign({}, d.marks, marks);
+    if(d.anno) anno = Object.assign({}, d.anno, anno);
+    if(d.taxonomy) for(const k in d.taxonomy){ if(!k.startsWith("_")) TAXO[k] = d.taxonomy[k]; }
+    save(LS_OVR, ovr); save(LS_MARK, marks); localStorage.setItem(LS_DEL, JSON.stringify(dels));
+    render();
+    const b=document.getElementById("badge"); if(b) b.textContent = "🟢 已连接本地服务 · 改动自动保存";
+    toast("已连接本地服务，改动会自动保存");
+  }).catch(()=>{});
+}
+window.addEventListener("load", boot);
+// ================= 排序（收藏时间 / 发布时间） =================
+function setSortKey(k){ sortKey = (k==="publish" ? "publish" : "collect");
+  localStorage.setItem(LS_SORTKEY, sortKey); render(); }
+function toggleSort(){ sortAsc = !sortAsc; localStorage.setItem(LS_SORT, sortAsc ? "asc" : "desc");
+  const what = sortKey==="collect" ? "收藏时间" : "发布时间";
+  toast("已按"+what+"：" + (sortAsc ? "由旧到新" : "由新到旧")); render(); }
+function sortLabel(){ return sortKey==="collect" ? "收藏时间" : "发布时间"; }
+function sortItems(arr){
+  const a = arr.slice();
+  if(sortKey==="collect"){
+    // cb 越大越新；ci 越小越新（0 = 该夹里最近收藏的那条）；再退回发布时间
+    a.sort((x,y)=>{
+      const bx=x.cb||0, by=y.cb||0;
+      if(bx!==by) return sortAsc ? (bx-by) : (by-bx);
+      const cx=(x.ci==null?1e6:x.ci), cy=(y.ci==null?1e6:y.ci);
+      if(cx!==cy) return sortAsc ? (cy-cx) : (cx-cy);
+      const tx=x.ts||0, ty=y.ts||0;
+      if(!tx && !ty) return 0; if(!tx) return 1; if(!ty) return -1;
+      return sortAsc ? (tx-ty) : (ty-tx);
+    });
+    return a;
+  }
+  a.sort((x,y)=>{ const tx=x.ts||0, ty=y.ts||0;
+    if(!tx && !ty) return 0; if(!tx) return 1; if(!ty) return -1;   // 无时间的排最后
+    return sortAsc ? (tx-ty) : (ty-tx); });
+  return a;
+}
+// 列表卡片上的日期标签：跟随当前排序口径
+function dateChip(v){
+  if(sortKey==="collect"){
+    if(v.cdate) return '<span class="chip date" title="我收藏这条的时间">🗓 '+esc(v.cdate)+' 收藏</span>';
+    if(v.cbefore) return '<span class="chip date" title="我收藏这条的时间">🗂 '+esc(v.cbefore)+' 之前</span>';
+    return '';
+  }
+  return v.date ? '<span class="chip date" title="视频发布时间">🗓 '+esc(v.date)+' 发布</span>' : '';
+}
+// ================= 待办事项 =================
+function saveTodos(){ localStorage.setItem(LS_TODO, JSON.stringify(todos)); apiSave("todos", todos); }
+function addTodo(text, srcId){
+  const t = (text||"").trim(); if(!t) return null;
+  const item = { id: "t" + Date.now() + Math.floor(Math.random()*1000), text: t, done: false,
+                 created: fmt(new Date()), src: srcId || "" };
+  todos.unshift(item); saveTodos(); render(); return item;
+}
+function addTodoFromInput(){ const el=document.getElementById("todoInput"); if(!el) return; const v=el.value; if(!v.trim()){el.focus();return;} addTodo(v); el.value=""; toast("已加入待办"); }
+function toggleTodo(id){ const it=todos.find(x=>x.id===id); if(!it) return; it.done=!it.done; it.doneAt=it.done?fmt(new Date()):""; saveTodos(); render(); }
+function delTodo(id){ todos = todos.filter(x=>x.id!==id); saveTodos(); render(); }
+function clearDoneTodos(){ const n=todos.filter(x=>x.done).length; if(!n){toast("没有已完成项");return;}
+  if(!confirm("清空 "+n+" 条已完成待办？")) return; todos=todos.filter(x=>!x.done); saveTodos(); render(); toast("已清空完成项"); }
+function addTodoFromVideo(id){ const v=DATA.find(x=>x.id===id); if(!v) return;
+  addTodo("看完并输出：「"+(v.title||"").slice(0,40)+"」的一个可执行动作", id); toast("已加入待办，可在「✅ 待办」里查看"); }
+function todoHtml(list){
+  if(!list.length) return '<div class="empty" style="padding:18px 0;font-size:13px">还没有待办，输入框里加一条试试</div>';
+  return list.map(t=>'<label class="todo-item'+(t.done?" done":"")+'">'
+    +'<input type="checkbox" '+(t.done?"checked":"")+' onchange="toggleTodo(\''+t.id+'\')">'
+    +'<span class="tx">'+esc(t.text)+(t.created?'<span class="tm">'+esc(t.created)+'</span>':'')+'</span>'
+    +'<button class="x" title="删除" onclick="event.preventDefault();event.stopPropagation();delTodo(\''+t.id+'\')">✕</button></label>').join("");
+}
+// ================= 每日推荐 =================
+function rerollDay(){ dayOffset++; localStorage.setItem(LS_DAY, JSON.stringify({date: todayStr(), off: dayOffset})); render(); toast("已换一个"); }
+function dailyVideo(){
+  const pool = DATA.filter(v=>v.has_transcript && (v.points||[]).length);
+  const arr = pool.length ? pool : DATA; if(!arr.length) return null;
+  return arr[(daySeed() + dayOffset*7) % arr.length];
+}
+function dailyCase(){ const c=(DAILY_CASES && DAILY_CASES.cases) || []; if(!c.length) return null;
+  return c[(daySeed() + dayOffset*3) % c.length]; }
+function sideRender(){
+  const el=document.getElementById("side"); if(!el) return;
+  const v=dailyVideo(), c=dailyCase();
+  const open=todos.filter(t=>!t.done), doneN=todos.length-open.length;
+  let h="";
+  h+='<div class="side-card"><h4>📌 今日推荐视频<span class="mini" onclick="rerollDay()">换一个</span></h4>';
+  if(v){ h+='<div class="side-v" onclick="openDetail(\''+v.id+'\')">'
+        +'<div class="sv-t">'+esc(v.title)+'</div>'
+        +(v.summary?'<div class="sv-s">'+esc(v.summary)+'</div>':'')
+        +(v.cdate?'<div class="sv-d">'+esc(v.major)+' · 收藏于 '+esc(v.cdate)+' → 点开看要点</div>'
+                 :'<div class="sv-d">'+esc(v.major)+' · '+(v.cbefore?('收藏于 '+esc(v.cbefore)+' 之前'):esc(v.date||""))+' → 点开看要点</div>')+'</div>'; }
+  else h+='<div class="empty" style="padding:12px 0;font-size:13px">暂无推荐</div>';
+  h+='</div>';
+  h+='<div class="side-card side-case"><h4>🎯 今日可执行案例<span class="mini" onclick="rerollDay()">换一个</span></h4>';
+  if(c){ h+='<div class="sc-title">'+esc(c.title||"")+'</div>'
+        +'<div class="sc-act">'+esc(c.action||"")+'</div>'
+        +(c.why?'<div class="sc-why">'+esc(c.why)+'</div>':'')
+        +(c.src?'<div class="sc-src">来源：'+esc(c.src)+'</div>':'')
+        +'<div style="margin-top:9px"><button class="btn" style="border-radius:8px;padding:5px 11px;font-size:12.5px" onclick="addTodo(document.getElementById(\'caseTxt\').textContent)">➕ 加入待办</button></div>'
+        +'<span id="caseTxt" style="display:none">'+esc(c.action||"")+'</span>'; }
+  else h+='<div class="empty" style="padding:12px 0;font-size:13px">暂无案例</div>';
+  h+='</div>';
+  h+='<div class="side-card"><h4>✅ 待办速览<span class="mini" onclick="setTab(\'todo\')">全部 '+todos.length+'</span></h4>';
+  h+='<div class="todo-add"><input id="todoInput" placeholder="加一条待办…" onkeydown="if(event.key===\'Enter\')addTodoFromInput()"><button onclick="addTodoFromInput()">+</button></div>';
+  h+=todoHtml(open.slice(0,5));
+  if(doneN) h+='<div class="hint" style="font-size:12px;color:var(--muted);margin-top:8px">已完成 '+doneN+' 条</div>';
+  h+='</div>';
+  el.innerHTML=h;
+}
+function filtered(){
+  const q=(document.getElementById("q").value||"").trim().toLowerCase();
+  let items=DATA.map(effView);
+  if(curTab==="trash") items=items.filter(v=>isDel(v.id));
+  else if(curTab==="star") items=items.filter(v=>!isDel(v.id)&&isStar(v.id));
+  else if(curTab==="review") items=items.filter(v=>!isDel(v.id)&&isReview(v.id));
+  else if(curTab==="todo") items=[];
+  else { items=items.filter(v=>!isDel(v.id));
+    if(curTab!=="all") items=items.filter(v=>v.major===curTab); }
+  if(curTab!=="all"&&curTab!=="star"&&curTab!=="review"&&curTab!=="trash"&&curTab!=="todo"&&curLv2) items=items.filter(v=>v.lv2===curLv2);
+  if(onlyStar) items=items.filter(v=>isStar(v.id));
+  if(onlyNew) items=items.filter(v=>NEW_IDS.has(v.id));
+  if(onlyTrans) items=items.filter(v=>v.has_transcript);
+  if(q) items=items.filter(v=>((v.title||"")+(v.summary||"")+(v.folder||"")+(v.author||"")+(v.full_title||"")+(v.lv2||"")+(v.lv3||"")+((v.tags||[]).join(" "))).toLowerCase().includes(q));
+  return sortItems(items);
+}
+function renderTabs(){
+  const t=document.getElementById("tabs");
+  const cntMajor=m=>DATA.map(effView).filter(v=>v.major===m).length;
+  let h='<button class="'+(curTab==="all"?"active":"")+'" onclick="setTab(\'all\')">全部<span class="cnt">'+DATA.length+'</span></button>';
+  MAJORS.forEach(m=>{const c=cntMajor(m); if(c) h+='<button class="'+(curTab===m?"active":"")+'" onclick="setTab(\''+m+'\')">'+m+'<span class="cnt">'+c+'</span></button>';});
+  h+='<span class="sep"></span>';
+  h+='<button class="'+(curTab==="star"?"active":"")+'" onclick="setTab(\'star\')">⭐ 重要<span class="cnt">'+Object.values(marks).filter(x=>x.important).length+'</span></button>';
+  h+='<button class="'+(curTab==="review"?"active":"")+'" onclick="setTab(\'review\')">🔔 回顾清单<span class="cnt">'+Object.values(marks).filter(x=>x.review).length+'</span></button>';
+  h+='<button class="'+(curTab==="todo"?"active":"")+'" onclick="setTab(\'todo\')">✅ 待办<span class="cnt">'+todos.filter(t=>!t.done).length+'</span></button>';
+  h+='<button class="'+(curTab==="trash"?"active":"")+'" onclick="setTab(\'trash\')">🗑 已删除<span class="cnt">'+dels.length+'</span></button>';
+  h+='<span class="sep"></span>';
+  const l2s = (curTab && curTab!=="all" && curTab!=="star" && curTab!=="review" && curTab!=="trash" && curTab!=="todo") ? lv2List(curTab) : [];
+  let l2c = [];
+  if(l2s.length){
+    const base=DATA.map(effView).filter(v=>v.major===curTab && !isDel(v.id));
+    l2c = l2s.map(x=>[x, base.filter(v=>v.lv2===x).length]);
+    h+='<span class="sep"></span>';
+    h+='<select id="lv2Sel" class="lv2sel'+(curLv2?' on':'')+'" onchange="setLv2(this.value)">'
+      +'<option value="">▾ 二级分类（全部 '+base.length+' 条）</option></select>';
+  }
+  h+='<span class="sep"></span>';
+  h+='<span class="toggle '+(onlyNew?"on":"")+'" onclick="toggleFlag(\'onlyNew\')">本期新增</span>';
+  h+='<span class="toggle '+(onlyTrans?"on":"")+'" onclick="toggleFlag(\'onlyTrans\')">有逐字稿</span>';
+  h+='<span class="toggle '+(onlyStar?"on":"")+'" onclick="toggleFlag(\'onlyStar\')">只看重要</span>';
+  t.innerHTML=h;
+  const sel=document.getElementById("lv2Sel");
+  if(sel){ l2c.forEach(p=>{ const o=document.createElement("option");
+    o.value=p[0]; o.textContent=p[0]+"（"+p[1]+"）";
+    if(curLv2===p[0]) o.selected=true; sel.appendChild(o); }); }
+}
+function toggleFlag(f){if(f==="onlyStar")onlyStar=!onlyStar;if(f==="onlyNew")onlyNew=!onlyNew;if(f==="onlyTrans")onlyTrans=!onlyTrans;render();}
+function setTab(m){curTab=m;curLv2="";curId=null;view="list";location.hash="";render();}
+function openDetail(id){curId=id;view="detail";location.hash="#/v/"+id;render();window.scrollTo(0,0);}
+function goList(){view="list";curId=null;location.hash="";render();}
+function row(v){
+  const mk=(isStar(v.id)?'<span class="mk" title="重要">⭐</span>':'')+(isReview(v.id)?'<span class="mk" title="下期回顾">🔔</span>':'');
+  return '<div class="row" onclick="openDetail(\''+v.id+'\')">'
+   +(v.cover?'<img class="thumb" loading="lazy" src="'+v.cover+'" onerror="this.style.visibility=\'hidden\'">':'')
+   +'<div class="row-main"><div class="row-title">'+mk+'<span>'+esc(v.title)+'</span></div>'
+   +'<div class="row-sum">'+esc(v.summary || (!v.has_transcript ? (v.no_transcript?'（无语音内容）':'（摘要待转写）') : ''))+'</div>'
+   +'<div class="chips"><span class="chip major">'+esc(v.major)+'</span><span class="chip folder">📁 '+esc(v.folder)+'</span>'
+   +(v.author?'<span class="chip">👤 '+esc(v.author)+'</span>':'')
+   +(v.duration?'<span class="chip">⏱ '+v.duration+'</span>':'')
+   +dateChip(v)
+   +(NEW_IDS.has(v.id)?'<span class="chip new">本期新增</span>':'')
+   +(v.lv2?'<span class="chip lv2">' + esc(v.lv2) + '</span>':'')
+   +(v.lv3?'<span class="chip lv3">' + esc(v.lv3) + '</span>':'')
+   +tagHtml(v)
+   +(v.has_transcript?'':(v.no_transcript?'<span class="chip wait">无语音内容</span>':'<span class="chip wait">无逐字稿</span>'))
+   +'</div></div><button class="del-btn" title="删除这条" onclick="delVideo(event,\''+v.id+'\')">✕</button></div>';
+}
+function frameBlock(v,f){
+  const quotes=(v.segments||[]).filter(s=>Math.abs(s.t-f.t)<=50).slice(0,3);
+  const q=quotes.length?quotes.map(s=>'<span>'+esc(s.text)+'</span>').join(""):'';
+  return '<div class="tl-item"><div class="tl-time">'+mmss(f.t)+'</div><div class="tl-body">'
+   +'<img src="'+f.url+'" loading="lazy" onclick="zoom(this.src)">'
+   +(q?'<div class="tl-quote">'+q+'</div>':'')
+   +'<div class="tl-links"><button onclick="copyTime('+f.t+')">⏱ 复制时间 '+mmss(f.t)+'</button>'
+   +'<a href="'+v.url+'" target="_blank">▶ 在抖音打开</a></div>'
+   +'</div><button class="del-btn" title="删除这条" onclick="delVideo(event,\''+v.id+'\')">✕</button></div>';
+}
+function detail(v){
+  const notes=anno[v.id]||[];
+  const noVoice = !v.has_transcript && v.no_transcript;
+  const tl=(v.frames&&v.frames.length)?('<div class="tl">'+v.frames.map(f=>frameBlock(v,f)).join("")+'</div>')
+     :(noVoice?'<div class="empty">本条无语音内容（纯音乐 / BGM / 画面为主），未做转写与关键帧</div>'
+              :'<div class="empty">关键帧截图待生成（转写排队中）</div>');
+  const segs=(v.segments||[]);
+  const trans=segs.length?('<div class="trans">'+segs.map(s=>'<div onclick="copyTime('+s.t+')"><b>'+mmss(s.t)+'</b>'+esc(s.text)+'</div>').join("")+'</div>'):(noVoice?'（本条无语音内容）':'（待转写）');
+  const pts=(v.points&&v.points.length)?('<ul class="points">'+v.points.map(p=>'<li>'+esc(p)+'</li>').join("")+'</ul>'):'';
+  return '<button class="back" onclick="goList()">← 返回列表</button><div class="detail">'
+   +'<div class="d-title">'+esc(v.title)+'</div>'
+   +'<div class="d-full">原描述：'+esc(v.full_title||"")+'</div>'
+   +'<div class="d-meta"><span class="chip major">'+esc(v.major)+'</span><span class="chip folder">📁 '+esc(v.folder)+'</span>'
+   +(v.author?'<span class="chip">👤 '+esc(v.author)+'</span>':'')+(v.duration?'<span class="chip">⏱ '+v.duration+'</span>':'')
+   +(v.cdate?'<span class="chip date" title="我收藏这条的时间">🗓 收藏于 '+esc(v.cdate)+'</span>':(v.cbefore?'<span class="chip date" title="我收藏这条的时间">🗂 收藏于 '+esc(v.cbefore)+' 之前</span>':''))
+   +(v.date?'<span class="chip" title="视频发布时间">📤 发布 '+esc(v.date)+'</span>':'')
+   +'<a class="chip" href="'+v.url+'" target="_blank">▶ 原视频</a></div>'
+   +'<div class="d-actions">'
+   +'<button class="'+(isStar(v.id)?"on":"")+'" onclick="toggleStar(\''+v.id+'\')">'+(isStar(v.id)?"⭐ 已标为重要":"⭐ 标为重要")+'</button>'
+   +'<button class="rev '+(isReview(v.id)?"on":"")+'" onclick="toggleReview(\''+v.id+'\')">'+(isReview(v.id)?"🔔 已加入下期回顾":"🔔 加入下期回顾")+'</button>'
+   +'<button onclick="addTodoFromVideo(\''+v.id+'\')">➕ 加入待办</button>'
+   +'<button onclick="delVideo(null,\''+v.id+'\')">🗑 删除这条</button>'
+   +'</div>'
+   +'<div class="sec"><h3>📝 短总结</h3><div class="sum-box">'+esc(v.summary||(noVoice?"（本条无语音内容，不做总结）":"（逐字稿完成后自动生成短总结）"))+'</div></div>'
+   +(pts?'<div class="sec"><h3>🎯 要点</h3>'+pts+'</div>':'')
+   +'<div class="sec"><h3>🎬 重要节点（时间点 ↔ 截图 ↔ 原话）</h3>'+tl+'</div>'
+   +'<div class="sec"><h3>📄 完整逐字稿（点任意行复制时间点）</h3><details><summary>展开 / 收起全文</summary>'+trans+'</details></div>'
+   +'<div class="sec"><h3>✍️ 我的批注</h3>'
+   +'<div class="anno-area"><textarea id="ta" placeholder="写下你的想法、疑问、行动项…"></textarea>'
+   +'<div class="save-row"><button onclick="saveAnno(\''+v.id+'\')">保存批注</button></div>'
+   +'<div class="sec"><h3>🏷 分类（可修改）</h3>'
+   +'<div class="tag-edit">大类 <input id="sel-major" list="major-list" value="'+esc(eff(v).major)+'" placeholder="可输入新大类" style="width:130px">'
+   +'<datalist id="major-list">'+MAJORS.map(m=>'<option>'+esc(m)+'</option>').join('')+'</datalist>'
+   +'　收藏夹 <input id="inp-folder" list="folder-list" value="'+esc(eff(v).folder)+'">'
+   +'</div>'
+   +'<div class="tag-edit" style="margin-top:8px">二级 <input id="sel-lv2" list="lv2-edit-list" value="'+esc(v.lv2)+'" placeholder="可输入新二级" style="width:130px">'
+   +'<datalist id="lv2-edit-list">'+lv2List(v.major).map(x=>'<option>'+esc(x)+'</option>').join('')+'</datalist>'
+   +'　三级 <input id="inp-lv3" list="lv3-list" value="'+esc(v.lv3)+'" placeholder="可自定义">'
+   +'<datalist id="lv3-list">'+allLv3(v.major).map(x=>'<option>'+esc(x)+'</option>').join('')+'</datalist>'
+   +'<div class="tag-edit" style="margin-top:8px">标签 <span id="tag-wrap">'+(tagHtml(v)||'<span class="chip">（暂无）</span>')+'</span>'
+   +'<input id="inp-tag" placeholder="输入新标签">'
+   +'<button onclick="addTag(\''+v.id+'\')">+ 添加</button>'
+   +'<span class="tag-hint" style="margin:0">点标签上的 ✕ 可删除</span></div>'
+   +'<div class="tag-edit" style="margin-top:6px">'
+   +'<datalist id="folder-list">'+FOLDERS.map(f=>'<option>'+esc(f)+'</option>').join('')+'</datalist>'
+   +'<button onclick="saveTag(\''+v.id+'\')">保存</button>'
+   +'<button class="ghost" onclick="resetTag(\''+v.id+'\')">恢复自动</button>'
+   +( (ovr[v.id]||OVERRIDES[v.id]) ? '<span class="chip major">已人工修改</span>' : '' )
+   +'</div></div>'
+   +notes.map((n,i)=>'<div class="anno-item">✍️ '+esc(n.text).replace(/\n/g,"<br>")+'<button class="del" onclick="delAnno(\''+v.id+'\','+i+')">删除</button><span class="t">'+n.time+'</span></div>').join("")
+   +'</div></div>'
+   +'</div>';
+}
+function saveAnno(id){const t=document.getElementById("ta");if(!t.value.trim()){t.focus();return;}
+  (anno[id]=anno[id]||[]).push({text:t.value.trim(),time:fmt(new Date())});save(LS_ANNO,anno);apiSave("anno",anno);render();toast("批注已保存");}
+function delAnno(id,i){anno[id].splice(i,1);if(!anno[id].length)delete anno[id];save(LS_ANNO,anno);apiSave("anno",anno);render();}
+function copyTime(t){const s=mmss(t);navigator.clipboard&&navigator.clipboard.writeText(s);toast("已复制时间点 "+s+"，可在抖音里定位");}
+function zoom(src){document.getElementById("lb-img").src=src;document.getElementById("lightbox").style.display="flex";}
+// 离线（file:// 打开）时的手动导出兜底：ONLINE=false 时改动只存localStorage，
+// 必须靠这些按钮才能把改动带回data/。服务端在线时它们会自动隐藏。
+function dl(name, obj){
+  const b=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast("已导出 "+name+"，请放到 data/ 目录后重建");
+}
+function exportExcluded(){ if(!dels.length){toast("没有待导出的删除");return;} dl("excluded.json",{_说明:"人工删除名单（网页导出）",ids:dels}); }
+function exportMarks(){ dl("marks.json",{_说明:"⭐重要 / 🔔回顾 标记（网页导出）",marks:marks}); }
+function exportDeleted(){ if(!dels.length){toast("没有待导出的删除");return;}
+  const out={}; DATA.forEach(v=>{ if(dels.includes(v.id)) out[v.id]={id:v.id,title:v.title,folder:(v.folder||"")}; });
+  dl("removed_by_user.json",{_说明:"网页删除条目快照（含标题，可恢复）",count:dels.length,items:out}); }
+function render(){
+  renderTabs();
+  const list=filtered();
+  document.getElementById("badge").textContent=DATA.length+" 条收藏 · "+(WEEKLY.label||"");
+  const main=document.getElementById("main");
+  if(view==="detail"){
+    const v0=DATA.find(x=>x.id===curId);
+    const v=v0?effView(v0):null;
+    main.innerHTML=v?detail(v):'<div class="empty">未找到</div>';
+    sideRender();
+    return;
+  }
+  if(curTab==="todo"){
+    const open=todos.filter(t=>!t.done), done=todos.filter(t=>t.done);
+    main.innerHTML=
+      '<div class="stats">'
+      +'<div class="stat"><b>'+open.length+'</b><span>待办未完成</span></div>'
+      +'<div class="stat"><b>'+done.length+'</b><span>已完成</span></div>'
+      +'<div class="stat"><b>'+todos.length+'</b><span>全部待办</span></div>'
+      +'<div class="stat"><b>'+DATA.filter(v=>v.has_transcript).length+'</b><span>已有逐字稿</span></div>'
+      +'</div>'
+      +'<div class="todo-box"><h3 style="font-size:15px;margin-bottom:9px">✍️ 新增待办</h3>'
+      +'<div class="todo-add"><input id="todoInput" placeholder="写下一件要动手做的事（回车即可添加）…" onkeydown="if(event.key===\'Enter\')addTodoFromInput()"><button onclick="addTodoFromInput()">添加</button></div>'
+      +'<div class="hint">小提示：在任意视频详情页点「➕ 加入待办」，可以把「看完这条要做什么」直接变成待办。</div></div>'
+      +'<div class="todo-box"><h3 style="font-size:15px">⏳ 未完成</h3>'+todoHtml(open)+'</div>'
+      +'<div class="todo-box"><h3 style="font-size:15px">✅ 已完成 <button class="x" style="float:right;border:1px solid var(--border);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;color:var(--muted)" onclick="clearDoneTodos()">清空已完成</button></h3>'+todoHtml(done)+'</div>';
+    sideRender();
+    return;
+  }
+  main.innerHTML=
+   '<div class="stats">'
+   +'<div class="stat"><b>'+list.length+'</b><span>当前筛选</span></div>'
+   +'<div class="stat"><b>'+Object.values(marks).filter(x=>x.important).length+'</b><span>⭐ 重要</span></div>'
+   +'<div class="stat"><b>'+Object.values(marks).filter(x=>x.review).length+'</b><span>🔔 待回顾</span></div>'
+   +'<div class="stat"><b>'+DATA.filter(v=>v.has_transcript).length+'</b><span>已有逐字稿</span></div>'
+   +'</div>'
+   +'<div class="toolbar">'
+   +'<select class="sortsel" onchange="setSortKey(this.value)" title="选择按什么排序">'
+   +'<option value="collect"'+(sortKey==="collect"?" selected":"")+'>🗓 按收藏时间</option>'
+   +'<option value="publish"'+(sortKey==="publish"?" selected":"")+'>📤 按发布时间</option>'
+   +'</select>'
+   +'<button class="'+(sortAsc?"on":"")+'" onclick="toggleSort()" title="点一下切换升序/降序">🕒 '+sortLabel()+'：'+(sortAsc?"旧 → 新":"新 → 旧")+'</button>'
+   +(ONLINE?'<button onclick="apiRebuild()">🔄 同步到 Obsidian / 周报</button>'
+          :'<button onclick="exportExcluded()" title="把本页删除的条目导出为 excluded.json，放到 data/ 即生效">🗑 导出删除名单'+(dels.length?'('+dels.length+')':'')+'</button>'
+           +'<button onclick="exportOverrides()" title="导出手工分类与标签，覆盖到 data/ 后重建即生效">🏷 导出分类修改</button>'
+           +'<button onclick="exportMarks()" title="导出 ⭐重要 / 🔔回顾 标记">⭐ 导出标记</button>')
+   +'</div>'
+   +(WEEKLY.text?'<details class="wk"><summary>📋 本期整理小结（点击展开）</summary><div class="summary-card">'+esc(WEEKLY.text)+'</div></details>':'')
+   +'<div id="imp2"></div>'
+   +(list.length?list.map(row).join(""):'<div class="empty">没有匹配的内容</div>');
+  sideRender();
+}
+function saveTag(id){
+  const m=document.getElementById("sel-major").value;
+  const f=document.getElementById("inp-folder").value.trim();
+  const l2el=document.getElementById("sel-lv2");
+  const l3el=document.getElementById("inp-lv3");
+  const l2=l2el?l2el.value.trim():"", l3=l3el?l3el.value.trim():"";
+  ovr[id]=ovr[id]||{}; ovr[id].major=m; if(f) ovr[id].folder=f;
+  ovr[id].lv2=l2; ovr[id].lv3=l3;
+  // 新二级/三级并入体系（本机）
+  if(m && MAJORS.indexOf(m)<0) MAJORS.push(m);
+  if(m){ TAXO[m]=TAXO[m]||{}; if(l2 && !TAXO[m][l2]) TAXO[m][l2]=[]; if(l2 && l3 && TAXO[m][l2].indexOf(l3)<0) TAXO[m][l2].push(l3); }
+  save(LS_OVR,ovr); apiSave("overrides", ovr); render(); toast("已保存：" + m + (l2?(" > "+l2):"") + (l3?(" > "+l3):"") + (ovr[id].tags&&ovr[id].tags.length?(" ｜标签 "+ovr[id].tags.join("、")):""));
+}
+function resetTag(id){ if(ovr[id]){delete ovr[id];save(LS_OVR,ovr);} render(); toast("已恢复自动分类"); }
+function exportOverrides(){const b=new Blob([JSON.stringify({_说明:"人工分类+分级+标签（网页导出）", overrides:ovr, taxonomy:TAXO},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="overrides.json";a.click();
+  toast("已导出 overrides.json，放进 data/ 后重建即生效");}
+function exportAnno(){const b=new Blob([JSON.stringify(anno,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="抖音收藏批注_备份.json";a.click();}
+window.addEventListener("hashchange",()=>{const m=location.hash.match(/^#\/v\/(\d+)/);if(m){curId=m[1];view="detail";render();}});
+if(location.hash){const m=location.hash.match(/^#\/v\/(\d+)/);if(m){curId=m[1];view="detail";}}
+render();
+</script>
+</body>
+</html>
