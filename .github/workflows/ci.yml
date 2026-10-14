@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  privacy-scan:
+    name: 隐私扫描（个人数据不得入库）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 检查严禁提交的文件/目录
+        run: |
+          set -e
+          fail=0
+          for d in data media vault browser_profile models dist 产出 logs; do
+            if [ -d "$d" ]; then echo "❌ 禁止提交目录: $d"; fail=1; fi
+          done
+          hits=$(find . -path ./demo -prune -o \
+                   \( -name 'cookies*.txt' -o -name '*.cookies' \
+                      -o -name 'favorites*.json' -o -name 'enriched.json' \
+                      -o -name 'seen_ids.json' -o -name 'new_ids.json' \
+                      -o -name 'collect_index.json' -o -name 'llm_notes.json' \
+                      -o -name '*.mp4' -o -name '*.wav' -o -name '*.mp3' \
+                      -o -name '*.pyc' \) -print)
+          if [ -n "$hits" ]; then
+            echo "❌ 发现禁止提交的文件："
+            echo "$hits"
+            fail=1
+          fi
+          if [ "$fail" = "1" ]; then echo "::error::隐私扫描失败：仓库里出现了个人数据"; exit 1; fi
+          echo "✅ 未发现个人数据"
+
+  python-check:
+    name: 语法与依赖检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 编译全部脚本（不执行）
+        run: python -m compileall -q scripts run.py demo/make_demo.py
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+      - name: 导入自检（核心模块可 import）
+        run: |
+          python - <<'PY'
+          import importlib.util, pathlib, sys
+          root = pathlib.Path('.')
+          sys.path.insert(0, str(root / 'scripts'))
+          bad = []
+          for name in ['lockutil', 'enrich', 'build_dashboard']:
+              try:
+                  importlib.import_module(name)
+              except Exception as e:
+                  bad.append(f'{name}: {type(e).__name__}: {e}')
+          print('import 失败:', bad or '无')
+          sys.exit(1 if bad else 0)
+          PY
+
+  demo-smoke:
+    name: 演示页构建冒烟
+    runs-on: ubuntu-latest
+    needs: python-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: 生成 demo 并检查占位符是否全部替换
+        run: |
+          python demo/make_demo.py
+          if grep -q "__DATA__" demo/index.html; then
+            echo "::error::demo/index.html 仍有未替换的模板占位符"; exit 1
+          fi
+          test -s demo/index.html && echo "✅ demo 构建成功"
